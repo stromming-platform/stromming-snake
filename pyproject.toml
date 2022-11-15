@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "stromming-snake"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Stream overlay backend"
+authors = ["dny"]
 readme = "README.md"
 packages = [{include = "stromming_snake"}]
 
