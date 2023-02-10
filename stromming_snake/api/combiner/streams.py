@@ -2,6 +2,8 @@ import ffmpeg
 import os
 import uuid
 
+from .helpers import fix_odd
+
 # Create one object per tile?
 class Tile():
     source = ""
@@ -34,29 +36,6 @@ class Tile():
         if os.path.exists(self.scaled_path):
             os.remove(self.scaled_path)
 
-
-def fix_odd(x, y) -> tuple((int, int)):
-    if x % 2 == 1:
-        x = x + 1
-    if y % 2 == 1:
-        y = y + 1
-    return x, y
-
-
-# Paths to test video files
-testVideo = "../../video/mainbroadcast.mp4"
-player1 = "../../video/player1.mp4"
-player2 = "../../video/player2.mp4"
-sample1 = "../../video/sample1.mp4"
-
-# Test tiles
-tile1 = Tile("../../video/sample1.mp4", 0, 0, False)
-tile2 = Tile("../../video/sample1.mp4", 1, 0, False)
-tile3 = Tile("../../video/sample1.mp4", 0, 1, False)
-tile4 = Tile("../../video/sample1.mp4", 2, 0, False)
-
-list_tiles_1 = [tile1, tile2, tile3]
-list_tiles_2 = [tile1, tile2, tile4]
 
 class StreamTiler():
     div_factor_x = 0
@@ -122,102 +101,13 @@ class StreamTiler():
         if tile.x_pos == 1 and tile.y_pos == 1:
             self.base = self.base.overlay(ffmpeg.input(tile.scaled_path), x=self.baseWidth/self.div_factor_x, y=self.baseHeight/self.div_factor_y)
 
-# --------------- OLD CODE --------------------
-# ----- HARDCODED, USE IF ALL ELSE FAILS ------
+# Test tiles
+# tile1 = Tile("../../video/sample1.mp4", 0, 0, False)
+# tile2 = Tile("../../video/sample1.mp4", 1, 0, False)
+# tile3 = Tile("../../video/sample1.mp4", 0, 1, False)
+# tile4 = Tile("../../video/sample1.mp4", 2, 0, False)
 
-def generate_scaled_video(input_file_path, output_path, width, height):
-    # Scales a video file based on the width and height input variables 
-    # and outputs the specified resulting video file path. 
-    input_video = ffmpeg.input(input_file_path)
-    _ = (
-        input_video
-        .filter('scale', width, height)
-        .output(output_path)
-        .overwrite_output()
-        .run()
-    )
-    return output_path
-
-def get_video_dimensions(source) -> None:
-    # Takes a video file location and returns the dimensions of the source file
-    probe = ffmpeg.probe(source)
-    video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
-    width = int(video_stream['width'])
-    height = int(video_stream['height'])
-    return fix_odd(width, height)
-
-def ffmpeg_overlay():
-    output_filename = "triple.mp4"
-    # Get dimensions of video file
-    width, height = get_video_dimensions(testVideo)
-    # width, height = 0
-
-    # Use dimensions to create an empty source to place overlays on
-    base = ffmpeg.input(f'color=black:size={width}x{height}', f='lavfi')
-
-    # Scale down original video to fit into source
-    vid_two_thirds = ffmpeg.input(generate_scaled_video(testVideo, "tmp.mp4", width=(width/3)*2-50, height=height-200))
-    vid_mini_third1 = ffmpeg.input(generate_scaled_video(player1, "tmp1.mp4", width=width/3, height=height/2-100))
-    vid_mini_third2 = ffmpeg.input(generate_scaled_video(player2, "tmp2.mp4", width=width/3, height=height/2-100))
-    vid_quarter = ffmpeg.input(generate_scaled_video(sample1, "tmp3.mp4", width=width/2, height=height/2))
-    vid_half = ffmpeg.input(generate_scaled_video(sample1, "tmp4.mp4", width=width/2, height=height))
-
-    # Create overlays
-    base = (
-        base.overlay(vid_half)
-        .overlay(vid_quarter, x=width/2)
-        .overlay(vid_quarter, x=width/2, y=height/2)
-    )
-    # base = (
-    #     base.overlay(vid_two_thirds, x=20, y=100)
-    #     .overlay(vid_mini_third1, x=(width/3)*2-20, y=75)
-    #     .overlay(vid_mini_third2, x=(width/3)*2-20, y=height/2+25)
-    # )
-    # base = base.overlay(vid_quarter, x=width/2)
-    # base = base.overlay(vid_quarter, x=width/2, y=height/2)
-    # base = base.overlay(vid_half)
-    # base = base.overlay(vid_half, x=width/2)
-
-    # Generate the final result
-    base.output(output_filename, t='30').overwrite_output().run()
-
-    if os.path.exists("tmp.mp4"):
-        os.remove("tmp.mp4")
-        os.remove("tmp1.mp4")
-        os.remove("tmp2.mp4")
-        os.remove("tmp3.mp4")
-        os.remove("tmp4.mp4")
-    else:
-        print("No files to delete") 
-
-# Some weird json someone suggested
-example_object = {
-    "tiles": [
-        {
-            "video1": {
-                "source": "../../video/player1.mp4",
-                "width": 500,
-                "height": 250,
-                "position": [0, 0],
-                "audio": False
-            },
-            "video2": {
-                "source": "../../video/sample1.mp4",
-                "width": 200,
-                "height": 150,
-                "position": [1, 0],
-                "audio": True
-            },
-            "video3": {
-                "source": "../../video/player2.mp4",
-                "width": 200,
-                "height": 150,
-                "position": [0, 1],
-                "audio": False
-            }
-        }
-    ]
-}
+# list_tiles_1 = [tile1, tile2, tile3]
+# list_tiles_2 = [tile1, tile2, tile4]
 
 # sT = StreamTiler(list_tiles_1)
-# ffmpeg_overlay()
