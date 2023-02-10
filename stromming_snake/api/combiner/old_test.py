@@ -25,7 +25,7 @@ def get_video_dimensions(source) -> None:
     video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
     width = int(video_stream['width'])
     height = int(video_stream['height'])
-    return fix_odd(width, height)
+    return width, height
 
 def ffmpeg_overlay():
     output_filename = "triple.mp4"
