@@ -12,3 +12,18 @@ ffmpeg
 		[tmp3][lowerright] overlay=shortest=1:x=320:y=240
 	"
 	-c:v libx264 output.mkv
+ffmpeg
+
+	-i sample1.mp4 -i sample2.mp4 -i sample3.mp4 -i sample4.mp4
+	-filter_complex "
+		nullsrc=size=1920x1080 [base];
+		[0:v] setpts=PTS-STARTPTS, scale=960x540 [upperleft];
+		[1:v] setpts=PTS-STARTPTS, scale=960x540 [upperright];
+		[2:v] setpts=PTS-STARTPTS, scale=960x540 [lowerleft];
+		[3:v] setpts=PTS-STARTPTS, scale=960x540 [lowerright];
+		[base][upperleft] overlay=shortest=1 [tmp1];
+		[tmp1][upperright] overlay=shortest=1:x=320 [tmp2];
+		[tmp2][lowerleft] overlay=shortest=1:y=240 [tmp3];
+		[tmp3][lowerright] overlay=shortest=1:x=320:y=240
+	"
+	-c:v libx264 output.mkv
