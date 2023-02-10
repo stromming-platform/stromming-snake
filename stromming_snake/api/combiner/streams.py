@@ -2,8 +2,6 @@ import ffmpeg
 import os
 import uuid
 
-# TODO: Data class?
-
 # Create one object per tile?
 class Tile():
     source = ""
@@ -104,9 +102,10 @@ class StreamTiler():
         # and outputs the specified resulting video file path. 
         new_path = str(uuid.uuid1()) + ".mp4"
         input_video = ffmpeg.input(tile.source)
+        new_width, new_height = fix_odd(tile.width/self.div_factor_x, tile.height/self.div_factor_y)
         _ = (
             input_video
-            .filter('scale', tile.width/self.div_factor_x, tile.height/self.div_factor_y)
+            .filter('scale', new_width, new_height)
             .output(new_path)
             .overwrite_output()
             .run()
@@ -122,14 +121,6 @@ class StreamTiler():
             self.base = self.base.overlay(ffmpeg.input(tile.scaled_path), y=self.baseHeight/self.div_factor_y)
         if tile.x_pos == 1 and tile.y_pos == 1:
             self.base = self.base.overlay(ffmpeg.input(tile.scaled_path), x=self.baseWidth/self.div_factor_x, y=self.baseHeight/self.div_factor_y)
-        # base = base.overlay(tile.scaled_path, x=self.baseWidth/self.div_factor_x)
-        # base = base.overlay(tile.scaled_path, x=self.baseWidth/self.div_factor_x)
-        # base = base.overlay(tile.scaled_path, x=self.baseWidth/self.div_factor_x)
-        # base = (
-        #     base.overlay(vid_half)
-        #     .overlay(vid_quarter, x=width/2)
-        #     .overlay(vid_quarter, x=width/2, y=height/2)
-        # )
 
 # --------------- OLD CODE --------------------
 # ----- HARDCODED, USE IF ALL ELSE FAILS ------

@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from combiner.stream_handler import stream_handler
 
@@ -21,5 +22,13 @@ def create_tile(tiles: TileList):
             stream_handler.add_tile(tile.source, tile.x_pos, tile.y_pos, tile.audio)
     stream_handler.create_tiled_stream()
     stream_handler.reset_tiles()
-    return stream_handler.get_output_file()
+    curr_video_file = stream_handler.get_output_file()
+    return curr_video_file
 
+@app.get("/video")
+async def video_endpoint():
+    def iterfile():
+        with open(stream_handler.get_output_file(), mode="rb") as file_like:
+            yield from file_like
+
+    return StreamingResponse(iterfile(), media_type="video/mp4")
