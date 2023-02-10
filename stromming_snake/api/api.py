@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from combiner.stream_handler import stream_handler
@@ -27,8 +27,11 @@ def create_tile(tiles: TileList):
 
 @app.get("/video")
 async def video_endpoint():
-    def iterfile():
-        with open(stream_handler.get_output_file(), mode="rb") as file_like:
-            yield from file_like
-
-    return StreamingResponse(iterfile(), media_type="video/mp4")
+    try:
+        video_file = stream_handler.get_output_file()
+        def iterfile():
+            with open(video_file, mode="rb") as file_like:
+                yield from file_like
+        return StreamingResponse(iterfile(), media_type="video/mp4")
+    except AttributeError as e:
+        raise HTTPException(status_code=404, detail="Tiles not generated")
