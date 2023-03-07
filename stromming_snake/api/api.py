@@ -1,12 +1,21 @@
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from combiner.stream_handler import stream_handler
 
 app = FastAPI()
 
-sources = ["player1.mp4", "player2.mp4", "mainbroadcast.mp4", "sample1.mp4"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+sources = ["../../video/player1.mp4", "../../video/player2.mp4", "../../video/mainbroadcast.mp4", "../../video/sample1.mp4"]
 
 class ApiTile(BaseModel):
     source: str
@@ -41,3 +50,7 @@ async def video_endpoint():
 @app.get("/sources")
 def get_sources():
     return sources
+
+@app.delete("/delete")
+def delete_latest_video():
+    stream_handler.remove_output_file()

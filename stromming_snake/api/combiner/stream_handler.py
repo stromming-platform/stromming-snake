@@ -20,4 +20,7 @@ class StreamHandler():
     def reset_tiles(self):
         self.tiles = []
 
+    def remove_output_file(self):
+        self.sT.delete_output_file()
+
 stream_handler = StreamHandler()

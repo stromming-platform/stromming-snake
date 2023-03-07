@@ -67,11 +67,16 @@ class StreamTiler():
                 self.create_overlay(tile)
 
             self.output_file = str(uuid.uuid1())+".mp4"
-            self.base.output(self.output_file, t='30').overwrite_output().run()
+            self.base.output(self.output_file, t='15').overwrite_output().run()
         finally:
             # Clean up the temp files
             for tile in tiles:
                 tile.delete_scaled_file()
+
+    def delete_output_file(self):
+        if os.path.exists(self.output_file):
+            os.remove(self.output_file)
+            self.output_file = ""
 
     def generate_base(self, baseWidth, baseHeight):
         return ffmpeg.input(f'color=black:size={baseWidth}x{baseHeight}', f='lavfi')
