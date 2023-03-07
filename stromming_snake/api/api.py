@@ -6,6 +6,8 @@ from combiner.stream_handler import stream_handler
 
 app = FastAPI()
 
+sources = ["player1.mp4", "player2.mp4", "mainbroadcast.mp4", "sample1.mp4"]
+
 class ApiTile(BaseModel):
     source: str
     x_pos: int
@@ -35,3 +37,7 @@ async def video_endpoint():
         return StreamingResponse(iterfile(), media_type="video/mp4")
     except AttributeError as e:
         raise HTTPException(status_code=404, detail="Tiles not generated")
+
+@app.get("/sources")
+def get_sources():
+    return sources

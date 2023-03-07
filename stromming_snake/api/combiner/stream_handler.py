@@ -3,6 +3,7 @@ from .streams import StreamTiler, Tile
 class StreamHandler():
     tiles = []
     sT: StreamTiler
+    sources = []
 
     def __init__(self) -> None:
         pass
